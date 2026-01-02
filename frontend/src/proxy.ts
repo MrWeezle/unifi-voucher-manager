@@ -17,7 +17,7 @@ const guestAllowedPaths = [
   "favicon.svg",
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Extract client IP
