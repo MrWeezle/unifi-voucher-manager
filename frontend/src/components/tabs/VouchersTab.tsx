@@ -6,9 +6,12 @@ import VoucherModal from "@/components/modals/VoucherModal";
 import { PrintMode } from "@/app/print/page";
 import { Voucher } from "@/types/voucher";
 import { api } from "@/utils/api";
+import { isVoucherUsedUp } from "@/utils/format";
 import { notify } from "@/utils/notifications";
 import { useMemo, useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+
+const SHOW_USED_STORAGE_KEY = "uvm.showUsedVouchers";
 
 export default function VouchersTab() {
   const [loading, setLoading] = useState(true);
@@ -18,16 +21,35 @@ export default function VouchersTab() {
   const [editMode, setEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [showUsed, setShowUsed] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const stored = localStorage.getItem(SHOW_USED_STORAGE_KEY);
+    if (stored !== null) setShowUsed(stored === "true");
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(SHOW_USED_STORAGE_KEY, String(showUsed));
+  }, [showUsed]);
+
+  const usedUpCount = useMemo(
+    () => vouchers.filter(isVoucherUsedUp).length,
+    [vouchers],
+  );
+
   const filteredVouchers = useMemo(() => {
-    if (!searchQuery.trim()) return vouchers;
+    const visible = showUsed
+      ? vouchers
+      : vouchers.filter((v) => !isVoucherUsedUp(v));
+
+    if (!searchQuery.trim()) return visible;
 
     const query = searchQuery.toLowerCase().trim();
-    return vouchers.filter((voucher) =>
+    return visible.filter((voucher) =>
       voucher.name?.toLowerCase().includes(query),
     );
-  }, [vouchers, searchQuery]);
+  }, [vouchers, searchQuery, showUsed]);
 
   const expiredIds = useMemo(
     () => filteredVouchers.filter((v) => v.expired).map((v) => v.id),
@@ -167,6 +189,39 @@ export default function VouchersTab() {
             <button onClick={load} className="btn-secondary">
               Refresh
             </button>
+            <label className="flex-center gap-2 text-sm cursor-pointer select-none ml-1">
+              <input
+                type="checkbox"
+                checked={showUsed}
+                onChange={(e) => setShowUsed(e.target.checked)}
+                className="sr-only peer"
+              />
+              <span
+                className={`w-5 h-5 rounded-md border-2 flex-center shrink-0 peer-focus:ring-2 peer-focus:ring-primary-500
+                  ${showUsed ? "bg-primary-500 border-primary-600" : "unselected-neutral"}`}
+              >
+                {showUsed && (
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="w-3.5 h-3.5"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span>
+                Show used
+                {usedUpCount > 0 && (
+                  <span className="text-secondary"> ({usedUpCount})</span>
+                )}
+              </span>
+            </label>
           </>
         ) : (
           <>

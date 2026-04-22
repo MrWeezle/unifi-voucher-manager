@@ -4,6 +4,7 @@ import {
   formatDuration,
   formatGuestUsage,
   formatStatus,
+  isVoucherUsedUp,
 } from "@/utils/format";
 import { memo, useCallback } from "react";
 
@@ -15,11 +16,14 @@ type Props = {
 };
 
 const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
+  const usedUp = isVoucherUsedUp(voucher);
   const statusClass = voucher.expired
     ? "bg-status-danger text-status-danger"
-    : voucher.activatedAt
-      ? "bg-status-warning text-status-warning"
-      : "bg-status-success text-status-success";
+    : usedUp
+      ? "bg-status-danger text-status-danger"
+      : voucher.activatedAt
+        ? "bg-status-warning text-status-warning"
+        : "bg-status-success text-status-success";
   const onClickHandler = useCallback(
     () => onClick?.(voucher),
     [voucher, onClick],
@@ -30,7 +34,8 @@ const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
       onClick={onClickHandler}
       className={`card card-interactive
         ${selected ? "border-accent" : ""}
-        ${editMode ? "relative" : ""}`}
+        ${editMode ? "relative" : ""}
+        ${voucher.expired || usedUp ? "opacity-60" : ""}`}
     >
       {editMode && (
         <div className="absolute top-3 right-3 z-1000">
@@ -76,7 +81,7 @@ const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
           <span
             className={`px-2 py-1 rounded-lg text-xs font-semibold uppercase ${statusClass}`}
           >
-            {formatStatus(voucher.expired, voucher.activatedAt)}
+            {formatStatus(voucher.expired, voucher.activatedAt, usedUp)}
           </span>
           {voucher.expiresAt && (
             <span className="text-xs">Expires: {voucher.expiresAt}</span>

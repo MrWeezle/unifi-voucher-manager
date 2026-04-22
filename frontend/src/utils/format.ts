@@ -9,10 +9,23 @@ export function formatMaxGuests(maxGuests: number | null | undefined) {
 export function formatStatus(
   expired: boolean,
   activatedAt: string | null | undefined,
+  usedUp = false,
 ) {
   if (expired) return "Expired";
+  if (usedUp) return "Used";
   if (activatedAt) return "Active";
   return "Available";
+}
+
+export function isVoucherUsedUp(v: {
+  authorizedGuestCount: number;
+  authorizedGuestLimit?: number | null;
+}) {
+  return (
+    v.authorizedGuestLimit != null &&
+    v.authorizedGuestLimit > 0 &&
+    v.authorizedGuestCount >= v.authorizedGuestLimit
+  );
 }
 
 export function formatDuration(m: number | null | undefined) {
