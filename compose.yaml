@@ -1,37 +1,25 @@
 ---
 services:
   unifi-voucher-manager:
-    image: "docker.io/etiennecollin/unifi-voucher-manager:latest"
-    # Or use the github registry
-    # image: "ghcr.io/etiennecollin/unifi-voucher-manager:latest"
+    # Locally built image — `docker compose build` produces this tag, and
+    # `docker compose up` reuses it. If the image is missing, Compose builds
+    # it automatically from the Dockerfile below.
+    image: "unifi-voucher-manager:local"
+    build:
+      context: "./"
+      target: "runtime"
+      dockerfile: "./Dockerfile"
 
-    # To build the image yourself
-    # build:
-    #   context: "./"
-    #   target: "runtime"
-    #   dockerfile: "./Dockerfile"
+    # Upstream published images (uncomment one to pull instead of build):
+    # image: "docker.io/etiennecollin/unifi-voucher-manager:latest"
+    # image: "ghcr.io/etiennecollin/unifi-voucher-manager:latest"
 
     container_name: "unifi-voucher-manager"
     restart: "unless-stopped"
     ports:
       - "3000:3000"
 
-    # SEE README FOR ENVIRONMENT VARIABLES DOCUMENTATION
-    environment:
-      UNIFI_CONTROLLER_URL: "URL to your UniFi controller with protocol (`http://` or `https://`)."
-      UNIFI_API_KEY: "API Key for your UniFi controller."
-      UNIFI_HAS_VALID_CERT: "true" # Set to false only if your UniFi controller does not use a valid SSL certificate. Typically, this should remain true when accessing the controller (UNIFI_CONTROLLER_URL) through a reverse proxy or any setup providing trusted SSL certificates (e.g., Let's Encrypt).
-      WIFI_SSID: "Your guest WiFi SSID" # Optional, but recommended
-      WIFI_PASSWORD: "Youw guest WiFi password" # Optional, but recommended
-      GUEST_SUBNETWORK: "Your guest subnetwork in IPv4 CIDR notation (X.X.X.X/X)" # Optional, but recommended
-      TIMEZONE: "Your timezone (America/Toronto)" # Optional, but recommended
-
-      # ---- Microsoft Entra ID (Office 365) authentication ----
-      # All four required to enable login; authentication is enforced for `/`, `/print` and all `/rust-api/*` routes.
-      AUTH_SECRET: "Random string >=32 chars (generate with `openssl rand -base64 32`)"
-      AUTH_MICROSOFT_ENTRA_ID_ID: "Application (client) ID from the Entra ID app registration"
-      AUTH_MICROSOFT_ENTRA_ID_SECRET: "Client secret value from the app registration"
-      AUTH_MICROSOFT_ENTRA_ID_TENANT_ID: "Directory (tenant) ID from the app registration"
-      ADMIN_GROUP_ID: "Object ID of the Entra ID group allowed to sign in (users outside this group are rejected)"
-      AUTH_TRUST_HOST: "true" # Required when running behind a reverse proxy so Auth.js trusts X-Forwarded-* headers
-      # AUTH_URL: "https://uvm.example.com" # Optional — set explicitly if AUTH_TRUST_HOST alone is insufficient
+    # Configuration lives in .env (gitignored). Copy .env.example → .env and
+    # fill in the real values. See .env.example for documentation of each key.
+    env_file:
+      - .env
