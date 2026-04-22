@@ -5,11 +5,13 @@ import ThemeSwitcher from "@/components/utils/ThemeSwitcher";
 import WifiQrModal from "@/components/modals/WifiQrModal";
 import { useGlobal } from "@/contexts/GlobalContext";
 import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 
 export default function Header() {
   const [showWifi, setShowWifi] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const router = useRouter();
+  const { data: session } = useSession();
   const { wifiConfig, wifiString } = useGlobal();
   const qrAvailable: boolean = useMemo(
     () => !!(wifiConfig && wifiString),
@@ -67,6 +69,24 @@ export default function Header() {
             />
           </button>
           <ThemeSwitcher />
+          {session?.user && (
+            <div className="flex-center gap-2">
+              <span
+                className="hidden md:inline text-sm text-muted truncate max-w-[12rem]"
+                title={session.user.email ?? undefined}
+              >
+                {session.user.name ?? session.user.email}
+              </span>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="btn text-sm p-1 px-2"
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
       {qrAvailable && showWifi && (

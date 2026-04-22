@@ -109,6 +109,9 @@ ENV FRONTEND_TO_BACKEND_URL="http://127.0.0.1"
 ENV BACKEND_BIND_HOST="127.0.0.1"
 ENV BACKEND_BIND_PORT="8080"
 
+# Auth.js runs behind the container's reverse-proxy; trust X-Forwarded-* headers by default.
+ENV AUTH_TRUST_HOST="true"
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD /usr/local/bin/healthcheck.sh
 

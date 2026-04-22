@@ -1,8 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
+import { auth } from "@/auth";
 import { isInBlockedSubnet } from "@/utils/ipv4";
 
 export const config = {
-  matcher: ["/", "/rust-api/:path*"],
+  matcher: ["/", "/print", "/print/:path*", "/rust-api/:path*"],
 };
 
 const DEFAULT_FRONTEND_TO_BACKEND_URL = "http://127.0.0.1";
@@ -17,7 +18,10 @@ const guestAllowedPaths = [
   "favicon.svg",
 ];
 
-export function proxy(request: NextRequest) {
+// Endpoints that bypass authentication (used by unauthenticated guest flow).
+const publicApiPaths = ["/rust-api/vouchers/rolling"];
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Extract client IP
@@ -36,6 +40,20 @@ export function proxy(request: NextRequest) {
       isInBlockedSubnet(clientIp, guestSubnet)
     ) {
       return new NextResponse("Access denied", { status: 403 });
+    }
+  }
+
+  // Auth check — all matched routes are protected except public API paths.
+  const isPublicApiPath = publicApiPaths.includes(pathname);
+  if (!isPublicApiPath) {
+    const session = await auth();
+    if (!session) {
+      if (pathname.startsWith("/rust-api")) {
+        return new NextResponse("Unauthorized", { status: 401 });
+      }
+      const signInUrl = new URL("/api/auth/signin", request.url);
+      signInUrl.searchParams.set("callbackUrl", request.url);
+      return NextResponse.redirect(signInUrl);
     }
   }
 
