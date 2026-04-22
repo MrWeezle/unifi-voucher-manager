@@ -50,13 +50,10 @@ export default function QuickCreateTab() {
     <div>
       <form onSubmit={handleSubmit} className="card max-w-lg mx-auto space-y-6">
         <label className="block font-medium mb-1">Duration</label>
-        <select name="duration" defaultValue="1440" required>
-          <option value={60}>1 Hour</option>
-          <option value={240}>4 Hours</option>
-          <option value={1440}>24 Hours</option>
-          <option value={4320}>3 Days</option>
-          <option value={10080}>7 Days</option>
-          <option value={43200}>30 Days</option>
+        <select name="duration" defaultValue="525600" required>
+          <option value={1440}>1 Day</option>
+          <option value={10080}>1 Week</option>
+          <option value={525600}>1 Year</option>
         </select>
 
         <label className="block font-medium mb-1">Name</label>
