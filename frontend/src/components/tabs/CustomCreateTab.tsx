@@ -18,6 +18,8 @@ import {
 } from "@/utils/api";
 import { map } from "@/utils/functional";
 import { notify } from "@/utils/notifications";
+import { useTranslation } from "@/i18n";
+import { TranslationKey } from "@/i18n/en";
 import { useCallback, useState, FormEvent } from "react";
 
 type TimeUnit = "minutes" | "hours" | "days";
@@ -26,6 +28,7 @@ export default function CustomCreateTab() {
   const [loading, setLoading] = useState(false);
   const [newVoucher, setNewVoucher] = useState<Voucher | null>(null);
   const [durationUnit, setDurationUnit] = useState<TimeUnit>("minutes");
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,7 +44,7 @@ export default function CustomCreateTab() {
     const unit = String(data.get("durationUnit") || "minutes") as TimeUnit;
 
     if (!Number.isFinite(rawDuration) || rawDuration <= 0) {
-      notify("Duration must be a positive number", "error");
+      notify(t("customErrDurationPositive"), "error");
       setLoading(false);
       return;
     }
@@ -52,7 +55,7 @@ export default function CustomCreateTab() {
 
     if (durationMinutes > MAX_VOUCHER_DURATION_MINUTES) {
       notify(
-        `Duration too long. Maximum allowed is ${MAX_VOUCHER_DURATION_MINUTES} minutes.`,
+        t("customErrDurationMax", { max: MAX_VOUCHER_DURATION_MINUTES }),
         "error",
       );
       setLoading(false);
@@ -76,13 +79,10 @@ export default function CustomCreateTab() {
         setNewVoucher(voucher);
         form.reset();
       } else {
-        notify(
-          "Voucher created, but its data was found in response",
-          "warning",
-        );
+        notify(t("createErrNoVoucherInResponse"), "warning");
       }
     } catch {
-      notify("Failed to create voucher", "error");
+      notify(t("createErrFailed"), "error");
     }
     setLoading(false);
   };
@@ -100,33 +100,40 @@ export default function CustomCreateTab() {
   return (
     <div>
       <form onSubmit={handleSubmit} className="card max-w-lg mx-auto space-y-6">
-        {[
-          {
-            label: "Number",
-            name: "count",
-            type: "number",
-            props: {
-              required: true,
-              min: MIN_VOUCHER_COUNT,
-              max: MAX_VOUCHER_COUNT,
-              defaultValue: MIN_VOUCHER_COUNT,
+        {(
+          [
+            {
+              labelKey: "formCount",
+              name: "count",
+              type: "number",
+              props: {
+                required: true,
+                min: MIN_VOUCHER_COUNT,
+                max: MAX_VOUCHER_COUNT,
+                defaultValue: MIN_VOUCHER_COUNT,
+              },
             },
-          },
-          {
-            label: "Name",
-            name: "name",
-            type: "text",
-            props: { required: true, defaultValue: "Custom Voucher" },
-          },
-        ].map(({ label, name, type, props }) => (
+            {
+              labelKey: "formName",
+              name: "name",
+              type: "text",
+              props: { required: true, defaultValue: t("customDefaultName") },
+            },
+          ] as {
+            labelKey: TranslationKey;
+            name: string;
+            type: string;
+            props: Record<string, unknown>;
+          }[]
+        ).map(({ labelKey, name, type, props }) => (
           <div key={name}>
-            <label className="block font-medium mb-1">{label}</label>
+            <label className="block font-medium mb-1">{t(labelKey)}</label>
             <input name={name} type={type} {...(props as any)} />
           </div>
         ))}
 
         <div>
-          <label className="block font-medium mb-1">Duration</label>
+          <label className="block font-medium mb-1">{t("formDuration")}</label>
           <div className="flex-center gap-2">
             <input
               name="duration"
@@ -150,62 +157,69 @@ export default function CustomCreateTab() {
               className="w-auto"
               defaultValue="minutes"
             >
-              <option value="minutes">Minutes</option>
-              <option value="hours">Hours</option>
-              <option value="days">Days</option>
+              <option value="minutes">{t("formMinutes")}</option>
+              <option value="hours">{t("formHours")}</option>
+              <option value="days">{t("formDays")}</option>
             </select>
           </div>
         </div>
 
-        {[
-          {
-            label: "Guest Limit",
-            name: "guests",
-            type: "number",
-            props: {
-              min: MIN_VOUCHER_GUESTS,
-              max: MAX_VOUCHER_GUESTS,
-              placeholder: "Unlimited",
+        {(
+          [
+            {
+              labelKey: "formGuestLimit",
+              name: "guests",
+              type: "number",
+              props: {
+                min: MIN_VOUCHER_GUESTS,
+                max: MAX_VOUCHER_GUESTS,
+                placeholder: t("formUnlimited"),
+              },
             },
-          },
-          {
-            label: "Data Limit (MB)",
-            name: "data",
-            type: "number",
-            props: {
-              min: MIN_VOUCHER_DATA_MB,
-              max: MAX_VOUCHER_DATA_MB,
-              placeholder: "Unlimited",
+            {
+              labelKey: "formDataLimit",
+              name: "data",
+              type: "number",
+              props: {
+                min: MIN_VOUCHER_DATA_MB,
+                max: MAX_VOUCHER_DATA_MB,
+                placeholder: t("formUnlimited"),
+              },
             },
-          },
-          {
-            label: "Download Kbps",
-            name: "download",
-            type: "number",
-            props: {
-              min: MIN_VOUCHER_DOWNLOAD_KBPS,
-              max: MAX_VOUCHER_DOWNLOAD_KBPS,
-              placeholder: "Unlimited",
+            {
+              labelKey: "formDownloadKbps",
+              name: "download",
+              type: "number",
+              props: {
+                min: MIN_VOUCHER_DOWNLOAD_KBPS,
+                max: MAX_VOUCHER_DOWNLOAD_KBPS,
+                placeholder: t("formUnlimited"),
+              },
             },
-          },
-          {
-            label: "Upload Kbps",
-            name: "upload",
-            type: "number",
-            props: {
-              min: MIN_VOUCHER_UPLOAD_KBPS,
-              max: MAX_VOUCHER_UPLOAD_KBPS,
-              placeholder: "Unlimited",
+            {
+              labelKey: "formUploadKbps",
+              name: "upload",
+              type: "number",
+              props: {
+                min: MIN_VOUCHER_UPLOAD_KBPS,
+                max: MAX_VOUCHER_UPLOAD_KBPS,
+                placeholder: t("formUnlimited"),
+              },
             },
-          },
-        ].map(({ label, name, type, props }) => (
+          ] as {
+            labelKey: TranslationKey;
+            name: string;
+            type: string;
+            props: Record<string, unknown>;
+          }[]
+        ).map(({ labelKey, name, type, props }) => (
           <div key={name}>
-            <label className="block font-medium mb-1">{label}</label>
+            <label className="block font-medium mb-1">{t(labelKey)}</label>
             <input name={name} type={type} {...(props as any)} />
           </div>
         ))}
         <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? "Creating…" : "Create Custom Voucher"}
+          {loading ? t("createBtnCreating") : t("customBtnCreate")}
         </button>
       </form>
       {newVoucher && <SuccessModal voucher={newVoucher} onClose={closeModal} />}

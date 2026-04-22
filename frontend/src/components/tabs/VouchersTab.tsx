@@ -7,6 +7,7 @@ import { PrintMode } from "@/app/print/page";
 import { Voucher } from "@/types/voucher";
 import { api } from "@/utils/api";
 import { isVoucherUsedUp } from "@/utils/format";
+import { useTranslation } from "@/i18n";
 import { notify } from "@/utils/notifications";
 import { useMemo, useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ export default function VouchersTab() {
   const [busy, setBusy] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const stored = localStorage.getItem(SHOW_USED_STORAGE_KEY);
@@ -67,10 +69,10 @@ export default function VouchersTab() {
       const res = await api.getAllVouchers();
       setVouchers(res.data || []);
     } catch {
-      notify("Failed to load vouchers", "error");
+      notify(t("vouchersLoadFailed"), "error");
     }
     setLoading(false);
-  }, []);
+  }, [t]);
 
   const startEdit = useCallback(() => {
     setSelectedIds(new Set());
@@ -110,7 +112,6 @@ export default function VouchersTab() {
   const deleteVouchers = useCallback(
     async (kind: "selected" | "expired") => {
       setBusy(true);
-      const kind_word = kind === "selected" ? "" : "expired";
 
       try {
         const res =
@@ -120,21 +121,40 @@ export default function VouchersTab() {
 
         const count = res.vouchersDeleted || 0;
         if (count > 0) {
-          notify(
-            `Successfully deleted ${count} ${kind_word} voucher${count === 1 ? "" : "s"}`,
-            "success",
-          );
+          const key =
+            kind === "selected"
+              ? count === 1
+                ? "vouchersDeletedSelectedSingle"
+                : "vouchersDeletedSelectedMany"
+              : count === 1
+                ? "vouchersDeletedExpiredSingle"
+                : "vouchersDeletedExpiredMany";
+          notify(t(key, { count }), "success");
           setSelectedIds(new Set());
         } else {
-          notify(`No ${kind_word} vouchers were deleted`, "info");
+          notify(
+            t(
+              kind === "selected"
+                ? "vouchersNoneDeletedSelected"
+                : "vouchersNoneDeletedExpired",
+            ),
+            "info",
+          );
         }
       } catch {
-        notify(`Failed to delete ${kind_word} vouchers`, "error");
+        notify(
+          t(
+            kind === "selected"
+              ? "vouchersFailedDeleteSelected"
+              : "vouchersFailedDeleteExpired",
+          ),
+          "error",
+        );
       }
       setBusy(false);
       cancelEdit();
     },
-    [selectedVouchers, expiredIds, cancelEdit],
+    [selectedVouchers, expiredIds, cancelEdit, t],
   );
 
   useEffect(() => {
@@ -166,7 +186,7 @@ export default function VouchersTab() {
         <div className="relative">
           <input
             type="text"
-            placeholder="Search vouchers by name..."
+            placeholder={t("vouchersSearchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -184,10 +204,10 @@ export default function VouchersTab() {
         {!editMode ? (
           <>
             <button onClick={startEdit} className="btn-primary">
-              Edit Mode
+              {t("vouchersEditMode")}
             </button>
             <button onClick={load} className="btn-secondary">
-              Refresh
+              {t("vouchersRefresh")}
             </button>
             <label className="flex-center gap-2 text-sm cursor-pointer select-none ml-1">
               <input
@@ -216,7 +236,7 @@ export default function VouchersTab() {
                 )}
               </span>
               <span>
-                Show used
+                {t("vouchersShowUsed")}
                 {usedUpCount > 0 && (
                   <span className="text-secondary"> ({usedUpCount})</span>
                 )}
@@ -230,42 +250,42 @@ export default function VouchersTab() {
               disabled={!filteredVouchers.length}
               className="btn-primary"
             >
-              Select All
+              {t("vouchersSelectAll")}
             </button>
             <button
               onClick={() => handlePrintClick("grid")}
               disabled={!selectedVouchers.length}
               className="btn-secondary"
             >
-              Print (Tile)
+              {t("vouchersPrintTile")}
             </button>
             <button
               onClick={() => handlePrintClick("list")}
               disabled={!selectedVouchers.length}
               className="btn-secondary"
             >
-              Print (List)
+              {t("vouchersPrintList")}
             </button>
             <button
               onClick={() => deleteVouchers("selected")}
               disabled={busy || !selectedVouchers.length}
               className="btn-danger"
             >
-              Delete Selected
+              {t("vouchersDeleteSelected")}
             </button>
             <button
               onClick={() => deleteVouchers("expired")}
               disabled={busy || !expiredIds.length}
               className="btn-warning"
             >
-              Delete Expired
+              {t("vouchersDeleteExpired")}
             </button>
             <button onClick={cancelEdit} className="btn-primary">
-              Cancel
+              {t("vouchersCancel")}
             </button>
             {busy ? <Spinner /> : <></>}
             <span className="text-sm text-secondary font-bold ml-auto">
-              {selectedVouchers.length} selected
+              {t("vouchersSelected", { count: selectedVouchers.length })}
             </span>
           </>
         )}
@@ -273,7 +293,10 @@ export default function VouchersTab() {
 
       {searchQuery && (
         <div className="mb-4 text-sm text-secondary">
-          Showing {filteredVouchers.length} of {vouchers.length} vouchers
+          {t("vouchersShowingXofY", {
+            shown: filteredVouchers.length,
+            total: vouchers.length,
+          })}
         </div>
       )}
 
@@ -281,9 +304,7 @@ export default function VouchersTab() {
         <Spinner />
       ) : !filteredVouchers.length ? (
         <div className="text-center py-8 text-secondary">
-          {searchQuery
-            ? "No vouchers found matching your search"
-            : "No vouchers found"}
+          {searchQuery ? t("vouchersEmptySearch") : t("vouchersEmpty")}
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

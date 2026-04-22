@@ -4,11 +4,13 @@ import SuccessModal from "@/components/modals/SuccessModal";
 import { Voucher, VoucherCreateData } from "@/types/voucher";
 import { api } from "@/utils/api";
 import { notify } from "@/utils/notifications";
+import { useTranslation } from "@/i18n";
 import { useCallback, useState, FormEvent } from "react";
 
 export default function QuickCreateTab() {
   const [loading, setLoading] = useState<boolean>(false);
   const [newVoucher, setNewVoucher] = useState<Voucher | null>(null);
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,13 +33,10 @@ export default function QuickCreateTab() {
         setNewVoucher(voucher);
         form.reset();
       } else {
-        notify(
-          "Voucher created, but its data was found in response",
-          "warning",
-        );
+        notify(t("createErrNoVoucherInResponse"), "warning");
       }
     } catch {
-      notify("Failed to create voucher", "error");
+      notify(t("createErrFailed"), "error");
     }
     setLoading(false);
   };
@@ -49,18 +48,18 @@ export default function QuickCreateTab() {
   return (
     <div>
       <form onSubmit={handleSubmit} className="card max-w-lg mx-auto space-y-6">
-        <label className="block font-medium mb-1">Duration</label>
+        <label className="block font-medium mb-1">{t("formDuration")}</label>
         <select name="duration" defaultValue="525600" required>
-          <option value={1440}>1 Day</option>
-          <option value={10080}>1 Week</option>
-          <option value={525600}>1 Year</option>
+          <option value={1440}>{t("quickOneDay")}</option>
+          <option value={10080}>{t("quickOneWeek")}</option>
+          <option value={525600}>{t("quickOneYear")}</option>
         </select>
 
-        <label className="block font-medium mb-1">Name</label>
-        <input name="name" defaultValue="Quick Voucher" required />
+        <label className="block font-medium mb-1">{t("formName")}</label>
+        <input name="name" defaultValue={t("quickDefaultName")} required />
 
         <button type="submit" disabled={loading} className="btn-primary w-full">
-          {loading ? "Creating…" : "Create Voucher"}
+          {loading ? t("createBtnCreating") : t("quickBtnCreate")}
         </button>
       </form>
 

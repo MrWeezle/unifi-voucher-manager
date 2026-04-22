@@ -8,6 +8,7 @@ import {
   WifiConfig,
 } from "@/utils/wifi";
 import { SessionProvider } from "next-auth/react";
+import { I18nProvider } from "@/i18n";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type GlobalContextType = {
@@ -72,16 +73,18 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <SessionProvider>
-      <GlobalContext.Provider
-        value={{
-          wifiConfig,
-          wifiString,
-          theme,
-          setTheme,
-        }}
-      >
-        {children}
-      </GlobalContext.Provider>
+      <I18nProvider>
+        <GlobalContext.Provider
+          value={{
+            wifiConfig,
+            wifiString,
+            theme,
+            setTheme,
+          }}
+        >
+          {children}
+        </GlobalContext.Provider>
+      </I18nProvider>
     </SessionProvider>
   );
 };

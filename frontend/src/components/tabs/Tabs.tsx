@@ -4,34 +4,41 @@ import CustomCreateTab from "@/components/tabs/CustomCreateTab";
 import TestTab from "@/components/tabs/TestTab";
 import QuickCreateTab from "@/components/tabs/QuickCreateTab";
 import VouchersTab from "@/components/tabs/VouchersTab";
+import { useTranslation } from "@/i18n";
+import { TranslationKey } from "@/i18n/en";
 import { useState } from "react";
 
 const TAB_CONFIG = [
   {
     id: "vouchers",
-    label: "View Vouchers",
+    labelKey: "tabViewVouchers",
     component: VouchersTab,
     enabled: true,
   },
   {
     id: "quick",
-    label: "Quick Create",
+    labelKey: "tabQuickCreate",
     component: QuickCreateTab,
     enabled: true,
   },
   {
     id: "custom",
-    label: "Custom Create",
+    labelKey: "tabCustomCreate",
     component: CustomCreateTab,
     enabled: true,
   },
   {
     id: "test",
-    label: "Test",
+    labelKey: "tabViewVouchers",
     component: TestTab,
     enabled: false,
   },
-] as const;
+] as const satisfies ReadonlyArray<{
+  id: string;
+  labelKey: TranslationKey;
+  component: React.ComponentType;
+  enabled: boolean;
+}>;
 
 // Get enabled tabs and derive types
 const enabledTabs = TAB_CONFIG.filter((tab) => tab.enabled);
@@ -40,6 +47,7 @@ type TabId = (typeof tabIds)[number];
 
 export default function Tabs() {
   const [tab, setTab] = useState<TabId>(tabIds[0]);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -52,7 +60,7 @@ export default function Tabs() {
             }`}
             onClick={() => setTab(tabConfig.id)}
           >
-            {tabConfig.label}
+            {t(tabConfig.labelKey)}
           </button>
         ))}
       </nav>

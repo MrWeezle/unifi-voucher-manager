@@ -13,6 +13,7 @@ import {
 } from "@/utils/format";
 import { useGlobal } from "@/contexts/GlobalContext";
 import { formatCode } from "@/utils/format";
+import { useTranslation } from "@/i18n";
 import Spinner from "@/components/utils/Spinner";
 
 export type PrintMode = "list" | "grid";
@@ -20,36 +21,40 @@ export type PrintMode = "list" | "grid";
 // This component represents a single voucher card to be printed
 function VoucherPrintCard({ voucher }: { voucher: Voucher }) {
   const { wifiConfig, wifiString } = useGlobal();
+  const { t } = useTranslation();
 
   const fields = [
     {
-      label: "Duration",
-      value: formatDuration(voucher.timeLimitMinutes),
+      label: t("detailsDuration"),
+      value: formatDuration(voucher.timeLimitMinutes, t("formUnlimited")),
     },
     {
-      label: "Max Guests",
-      value: formatMaxGuests(voucher.authorizedGuestLimit),
+      label: t("printMaxGuests"),
+      value: formatMaxGuests(voucher.authorizedGuestLimit, t("formUnlimited")),
     },
     {
-      label: "Data Limit",
+      label: t("printDataLimit"),
       value: voucher.dataUsageLimitMBytes
-        ? formatBytes(voucher.dataUsageLimitMBytes * 1024 * 1024)
-        : "Unlimited",
+        ? formatBytes(
+            voucher.dataUsageLimitMBytes * 1024 * 1024,
+            t("formUnlimited"),
+          )
+        : t("formUnlimited"),
     },
     {
-      label: "Down Speed",
-      value: formatSpeed(voucher.rxRateLimitKbps),
+      label: t("printDownSpeed"),
+      value: formatSpeed(voucher.rxRateLimitKbps, t("formUnlimited")),
     },
     {
-      label: "Up Speed",
-      value: formatSpeed(voucher.txRateLimitKbps),
+      label: t("printUpSpeed"),
+      value: formatSpeed(voucher.txRateLimitKbps, t("formUnlimited")),
     },
   ];
 
   return (
     <div className="print-voucher">
       <div className="print-header">
-        <div className="print-title">WiFi Access Voucher</div>
+        <div className="print-title">{t("printVoucherTitle")}</div>
       </div>
 
       <div className="print-voucher-code">{formatCode(voucher.code)}</div>
@@ -65,37 +70,37 @@ function VoucherPrintCard({ voucher }: { voucher: Voucher }) {
         <div className="print-qr-section">
           {wifiString && (
             <>
-              <div className="font-bold mb-2">Scan to Connect</div>
+              <div className="font-bold mb-2">{t("printScanToConnect")}</div>
               <QRCodeSVG
                 value={wifiString}
                 size={140}
                 level="H"
                 marginSize={4}
-                title="Wi-Fi Access QR Code"
+                title={t("printQrTitle")}
               />
             </>
           )}
           <div className="print-qr-text">
-            <strong>Network:</strong> {wifiConfig.ssid}
+            <strong>{t("printNetwork")}</strong> {wifiConfig.ssid}
             <br />
             {wifiConfig.type === "nopass" ? (
-              "No Password"
+              t("printNoPassword")
             ) : (
               <>
-                <strong>Password:</strong> {wifiConfig.password}
+                <strong>{t("printPassword")}</strong> {wifiConfig.password}
               </>
             )}
-            {wifiConfig.hidden && <div>(Hidden Network)</div>}
+            {wifiConfig.hidden && <div>{t("printHiddenNetwork")}</div>}
           </div>
         </div>
       )}
 
       <div className="print-footer">
         <div>
-          <strong className="text-sm">ID:</strong> {voucher.id}
+          <strong className="text-sm">{t("printId")}</strong> {voucher.id}
         </div>
         <div>
-          <strong className="text-sm">Printed:</strong>{" "}
+          <strong className="text-sm">{t("printPrinted")}</strong>{" "}
           {new Date().toUTCString()}
         </div>
       </div>
@@ -110,6 +115,7 @@ function Vouchers() {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [mode, setMode] = useState<PrintMode>("list");
   const lastSearchParams = useRef<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const paramString = searchParams.toString();
@@ -140,9 +146,7 @@ function Vouchers() {
   }, [searchParams, router]);
 
   return !vouchers.length ? (
-    <div style={{ textAlign: "center" }}>
-      No vouchers to print, press backspace
-    </div>
+    <div style={{ textAlign: "center" }}>{t("printNoVouchers")}</div>
   ) : (
     <div className={mode === "grid" ? "print-grid" : "print-list"}>
       {vouchers.map((v) => (

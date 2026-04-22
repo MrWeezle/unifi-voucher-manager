@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "@/i18n";
 import { ReactNode, useEffect, RefObject } from "react";
 
 type Props = {
@@ -16,6 +17,7 @@ export default function Modal({
   ref,
   children,
 }: Props) {
+  const { t } = useTranslation();
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -47,7 +49,7 @@ export default function Modal({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-1 flex-center rounded-full text-secondary hover:text-primary hover-scale btn"
-          aria-label="Close"
+          aria-label={t("modalClose")}
         >
           <svg
             viewBox="0 0 24 24"

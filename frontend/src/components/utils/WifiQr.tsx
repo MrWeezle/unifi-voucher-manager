@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useGlobal } from "@/contexts/GlobalContext";
+import { useTranslation } from "@/i18n";
 
 type Props = {
   className?: string;
@@ -23,6 +24,7 @@ export default function WifiQr({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [qrSize, setQrSize] = useState<number>(220);
   const { wifiConfig, wifiString } = useGlobal();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (overrideSize && overrideSize > 0) {
@@ -67,7 +69,7 @@ export default function WifiQr({
               level="H"
               bgColor="transparent"
               fgColor="currentColor"
-              title={`Wi-Fi access: ${wifiConfig.ssid}`}
+              title={`${t("wifiQrTitle")}: ${wifiConfig.ssid}`}
               imageSettings={{
                 src: imageSrc,
                 height: Math.floor(qrSize / 4),
@@ -76,11 +78,11 @@ export default function WifiQr({
               }}
             />
             <p className="text-sm text-muted">
-              Scan to join <strong>{wifiConfig.ssid}</strong>
+              {t("wifiScanToJoin")} <strong>{wifiConfig.ssid}</strong>
             </p>
           </>
         ) : (
-          <p className="text-sm text-muted">No Wi‑Fi credentials configured.</p>
+          <p className="text-sm text-muted">{t("wifiNoCredentials")}</p>
         )}
       </div>
     </div>

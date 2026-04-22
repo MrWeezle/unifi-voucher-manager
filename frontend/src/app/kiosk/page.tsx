@@ -8,11 +8,13 @@ import { Voucher } from "@/types/voucher";
 import { api } from "@/utils/api";
 import { formatCode } from "@/utils/format";
 import { useGlobal } from "@/contexts/GlobalContext";
+import { useTranslation } from "@/i18n";
 
 export default function KioskPage() {
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [state, setState] = useState<TriState | null>(null);
   const { wifiConfig, wifiString } = useGlobal();
+  const { t } = useTranslation();
 
   const load = useCallback(async () => {
     if (state === "loading") return;
@@ -48,7 +50,7 @@ export default function KioskPage() {
       case "error":
         return (
           <div className="text-center text-5xl sm:text-6xl md:text-7xl text-status-danger">
-            Could not load rolling voucher
+            {t("kioskLoadError")}
           </div>
         );
       case "ok":
@@ -60,16 +62,16 @@ export default function KioskPage() {
             {qrAvailable && <WifiQr className="w-full sm:h-80 md:h-96 " />}
             <div className={`text-center ${qrAvailable && "md:text-left"}`}>
               <h2 className="font-medium mb-4 text-3xl sm:text-4xl md:text-5xl">
-                Voucher Code
+                {t("kioskVoucherCode")}
               </h2>
               <div className="voucher-code tracking-widest text-5xl sm:text-6xl md:text-7xl">
-                {voucher ? formatCode(voucher.code) : "No voucher available"}
+                {voucher ? formatCode(voucher.code) : t("kioskNoVoucher")}
               </div>
             </div>
           </div>
         );
     }
-  }, [voucher, state, wifiConfig, wifiString]);
+  }, [voucher, state, wifiConfig, wifiString, t]);
 
   return (
     <main className="flex-center h-screen w-full px-4">{renderContent()}</main>

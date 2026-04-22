@@ -9,9 +9,11 @@ import {
   formatDuration,
   formatGuestUsage,
   formatSpeed,
-  formatStatus,
+  getVoucherStatus,
+  isVoucherUsedUp,
 } from "@/utils/format";
 import VoucherCode from "@/components/utils/VoucherCode";
+import { useTranslation } from "@/i18n";
 import { Voucher } from "@/types/voucher";
 import { TriState } from "@/types/state";
 
@@ -24,6 +26,7 @@ export default function VoucherModal({ voucher, onClose }: Props) {
   const [details, setDetails] = useState<Voucher | null>(null);
   const [state, setState] = useState<TriState | null>(null);
   const lastFetchedId = useRef<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Only fetch if we haven't already fetched this voucher's details
@@ -53,41 +56,60 @@ export default function VoucherModal({ voucher, onClose }: Props) {
       case "error":
         return (
           <div className="card text-status-danger text-center">
-            Failed to load detailed information
+            {t("detailsLoadFailed")}
           </div>
         );
       case "ok":
         if (details == null) {
           return;
         }
+        const status = getVoucherStatus(
+          details.expired,
+          details.activatedAt,
+          isVoucherUsedUp(details),
+        );
         return (
           <div className="space-y-4">
             {(
               [
-                ["Status", formatStatus(details.expired, details.activatedAt)],
-                ["Name", details.name || "No note"],
-                ["Created", details.createdAt],
+                [t("detailsStatus"), t(`status_${status}`)],
+                [t("detailsName"), details.name || t("detailsNoNote")],
+                [t("detailsCreated"), details.createdAt],
                 ...(details.activatedAt
-                  ? [["Activated", details.activatedAt]]
+                  ? [[t("detailsActivated"), details.activatedAt]]
                   : []),
-                ...(details.expiresAt ? [["Expires", details.expiresAt]] : []),
-                ["Duration", formatDuration(details.timeLimitMinutes)],
+                ...(details.expiresAt
+                  ? [[t("detailsExpires"), details.expiresAt]]
+                  : []),
                 [
-                  "Guest Usage",
+                  t("detailsDuration"),
+                  formatDuration(details.timeLimitMinutes, t("formUnlimited")),
+                ],
+                [
+                  t("detailsGuestUsage"),
                   formatGuestUsage(
                     details.authorizedGuestCount,
                     details.authorizedGuestLimit,
                   ),
                 ],
                 [
-                  "Data Limit",
+                  t("detailsDataLimit"),
                   details.dataUsageLimitMBytes
-                    ? formatBytes(details.dataUsageLimitMBytes * 1024 * 1024)
-                    : "Unlimited",
+                    ? formatBytes(
+                        details.dataUsageLimitMBytes * 1024 * 1024,
+                        t("formUnlimited"),
+                      )
+                    : t("formUnlimited"),
                 ],
-                ["Download Speed", formatSpeed(details.rxRateLimitKbps)],
-                ["Upload Speed", formatSpeed(details.txRateLimitKbps)],
-                ["ID", details.id],
+                [
+                  t("detailsDownloadSpeed"),
+                  formatSpeed(details.rxRateLimitKbps, t("formUnlimited")),
+                ],
+                [
+                  t("detailsUploadSpeed"),
+                  formatSpeed(details.txRateLimitKbps, t("formUnlimited")),
+                ],
+                [t("detailsId"), details.id],
               ] as [string, any][]
             ).map(([label, value]) => (
               <div
@@ -101,7 +123,7 @@ export default function VoucherModal({ voucher, onClose }: Props) {
           </div>
         );
     }
-  }, [state, details]);
+  }, [state, details, t]);
 
   return (
     <Modal onClose={onClose}>

@@ -2,11 +2,13 @@
 
 import { api } from "@/utils/api";
 import { getRuntimeConfig } from "@/utils/runtimeConfig";
+import { useTranslation } from "@/i18n";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function WelcomePage() {
   const [visited, setVisited] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const { t } = useTranslation();
 
   const ssid = useMemo(() => {
     if (!hasMounted) return null;
@@ -38,10 +40,12 @@ export default function WelcomePage() {
       <div className="w-full text-center font-bold text-4xl sm:text-5xl md:text-7xl lg:text-9xl leading-snug">
         {ssid ? (
           <>
-            Welcome to <span className="text-brand font-mono">{ssid}</span>!
+            {t("welcomeGreetingPrefix")}
+            <span className="text-brand font-mono">{ssid}</span>
+            {t("welcomeGreetingSuffix")}
           </>
         ) : (
-          "Welcome!"
+          t("welcomeGreeting")
         )}
       </div>
     </main>

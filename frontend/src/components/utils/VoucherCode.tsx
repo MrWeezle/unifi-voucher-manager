@@ -1,6 +1,9 @@
+"use client";
+
 import { copyText } from "@/utils/clipboard";
 import { formatCode } from "@/utils/format";
 import { notify } from "@/utils/notifications";
+import { useTranslation } from "@/i18n";
 import { useState } from "react";
 import { Voucher } from "@/types/voucher";
 import { useRouter } from "next/navigation";
@@ -14,14 +17,15 @@ export default function VoucherCode({ voucher, contentClassName = "" }: Props) {
   const code = formatCode(voucher.code);
   const [copied, setCopied] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleCopy = async () => {
     if (await copyText(voucher.code)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-      notify("Code copied to clipboard!", "success");
+      notify(t("codeCopied"), "success");
     } else {
-      notify("Failed to copy code", "error");
+      notify(t("codeCopyFailed"), "error");
     }
   };
 
@@ -42,10 +46,10 @@ export default function VoucherCode({ voucher, contentClassName = "" }: Props) {
       </div>
       <div className="flex-center gap-3">
         <button onClick={handleCopy} className="btn-success">
-          Copy Code
+          {t("codeCopy")}
         </button>
         <button onClick={handlePrint} className="btn-primary">
-          Print Voucher
+          {t("codePrint")}
         </button>
       </div>
     </div>

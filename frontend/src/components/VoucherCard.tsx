@@ -3,9 +3,10 @@ import {
   formatCode,
   formatDuration,
   formatGuestUsage,
-  formatStatus,
+  getVoucherStatus,
   isVoucherUsedUp,
 } from "@/utils/format";
+import { useTranslation } from "@/i18n";
 import { memo, useCallback } from "react";
 
 type Props = {
@@ -16,7 +17,9 @@ type Props = {
 };
 
 const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
+  const { t } = useTranslation();
   const usedUp = isVoucherUsedUp(voucher);
+  const status = getVoucherStatus(voucher.expired, voucher.activatedAt, usedUp);
   const statusClass = voucher.expired
     ? "bg-status-danger text-status-danger"
     : usedUp
@@ -56,7 +59,7 @@ const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
 
       <div className="space-y-1 text-sm text-secondary">
         <div className="flex justify-between">
-          <span>Guests Used:</span>
+          <span>{t("cardGuestsUsed")}</span>
           <span>
             {formatGuestUsage(
               voucher.authorizedGuestCount,
@@ -66,13 +69,15 @@ const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
         </div>
 
         <div className="flex justify-between">
-          <span>Session Time:</span>
-          <span>{formatDuration(voucher.timeLimitMinutes)}</span>
+          <span>{t("cardSessionTime")}</span>
+          <span>
+            {formatDuration(voucher.timeLimitMinutes, t("formUnlimited"))}
+          </span>
         </div>
 
         {voucher.activatedAt && (
           <div className="flex justify-between">
-            <span>First Used:</span>
+            <span>{t("cardFirstUsed")}</span>
             <span className="text-xs">{voucher.activatedAt}</span>
           </div>
         )}
@@ -81,10 +86,12 @@ const VoucherCard = ({ voucher, selected, editMode, onClick }: Props) => {
           <span
             className={`px-2 py-1 rounded-lg text-xs font-semibold uppercase ${statusClass}`}
           >
-            {formatStatus(voucher.expired, voucher.activatedAt, usedUp)}
+            {t(`status_${status}`)}
           </span>
           {voucher.expiresAt && (
-            <span className="text-xs">Expires: {voucher.expiresAt}</span>
+            <span className="text-xs">
+              {t("cardExpires")} {voucher.expiresAt}
+            </span>
           )}
         </div>
       </div>
