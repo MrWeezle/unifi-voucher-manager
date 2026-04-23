@@ -92,7 +92,7 @@ The repository is set up to build the image locally from the included `Dockerfil
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/etiennecollin/unifi-voucher-manager
+   git clone https://github.com/MrWeezlecollin/unifi-voucher-manager
    cd unifi-voucher-manager
    ```
 2. **Create your configuration**
@@ -119,7 +119,7 @@ The repository is set up to build the image locally from the included `Dockerfil
    - On Windows additionally: Visual Studio Build Tools (C++ workload), CMake and NASM — required by the Rust TLS crate (`aws-lc-sys`).
 2. **Clone the repository**
    ```bash
-   git clone https://github.com/etiennecollin/unifi-voucher-manager
+   git clone https://github.com/MrWeezle/unifi-voucher-manager
    ```
 3. **Configure your environment**
    ```bash
