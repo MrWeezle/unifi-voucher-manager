@@ -46,7 +46,7 @@ const tabIds = enabledTabs.map((tab) => tab.id);
 type TabId = (typeof tabIds)[number];
 
 export default function Tabs() {
-  const [tab, setTab] = useState<TabId>(tabIds[0]);
+  const [tab, setTab] = useState<TabId>(tabIds[1]);
   const { t } = useTranslation();
 
   return (
