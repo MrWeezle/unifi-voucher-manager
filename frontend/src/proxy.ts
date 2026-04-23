@@ -51,9 +51,16 @@ export async function proxy(request: NextRequest) {
       if (pathname.startsWith("/rust-api")) {
         return new NextResponse("Unauthorized", { status: 401 });
       }
-      const signInUrl = new URL("/api/auth/signin", request.url);
-      signInUrl.searchParams.set("callbackUrl", request.url);
-      return NextResponse.redirect(signInUrl);
+      // Redirect with a relative Location header. `request.url` can carry the
+      // internal bind host (e.g. 0.0.0.0:3000 when running in Docker), which
+      // is not routable from the browser. A relative location lets the
+      // browser resolve against its own current origin.
+      const callbackPath = pathname + request.nextUrl.search;
+      const location = `/api/auth/signin?callbackUrl=${encodeURIComponent(callbackPath)}`;
+      return new NextResponse(null, {
+        status: 307,
+        headers: { Location: location },
+      });
     }
   }
 
