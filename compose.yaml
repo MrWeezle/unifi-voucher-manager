@@ -23,3 +23,24 @@ services:
     # fill in the real values. See .env.example for documentation of each key.
     env_file:
       - .env
+
+  # Reverse proxy that terminates HTTPS on port 443 using a locally-trusted
+  # Caddy-internal CA. Required because Entra ID rejects OAuth redirects to
+  # non-HTTPS URLs outside of the literal `http://localhost`. See Caddyfile
+  # in the repo root for the proxy config.
+  caddy:
+    image: "caddy:2-alpine"
+    container_name: "uvm-caddy"
+    restart: "unless-stopped"
+    ports:
+      - "3443:3443"
+    volumes:
+      - "./Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "caddy-data:/data"
+      - "caddy-config:/config"
+    depends_on:
+      - unifi-voucher-manager
+
+volumes:
+  caddy-data:
+  caddy-config:

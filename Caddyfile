@@ -1,0 +1,13 @@
+srv-10.ffi.local:3443, srv-10:3443, 172.20.0.10:3443 {
+    # Caddy's internal CA issues a certificate whose SAN covers all three
+    # listed addresses. Browsers will show a warning until the Caddy root CA
+    # (at /data/caddy/pki/authorities/local/root.crt inside the container)
+    # is imported into the system trust store.
+    tls internal
+
+    # Forward every request to the Next.js frontend inside the compose net.
+    # Caddy sets X-Forwarded-{For,Proto,Host} automatically; Auth.js picks
+    # them up via AUTH_TRUST_HOST=true so OAuth URLs match the host the
+    # browser actually used.
+    reverse_proxy unifi-voucher-manager:3000
+}
