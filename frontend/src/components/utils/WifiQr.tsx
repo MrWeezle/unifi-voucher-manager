@@ -78,8 +78,8 @@ export default function WifiQr({
               }}
             />
             <p className="text-sm text-muted">
-              {t("wifiScanToJoin")} <strong>{wifiConfig.ssid}</strong>
-            </p>
+              {t("wifiScanToJoin")} <strong>"{wifiConfig.ssid}"</strong>
+            </p> {t("wifiScanToJoin_1")}
           </>
         ) : (
           <p className="text-sm text-muted">{t("wifiNoCredentials")}</p>

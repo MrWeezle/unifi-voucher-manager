@@ -14,8 +14,8 @@ export const en = {
 
   // Tabs
   tabViewVouchers: "View Vouchers",
-  tabQuickCreate: "Quick Create",
-  tabCustomCreate: "Custom Create",
+  tabQuickCreate: "For members",
+  tabCustomCreate: "Manual create",
 
   // Forms — shared
   formDuration: "Duration",
@@ -115,6 +115,7 @@ export const en = {
 
   // Wi-Fi QR
   wifiScanToJoin: "Scan to join",
+  wifiScanToJoin_1: "",
   wifiNoCredentials: "No Wi-Fi credentials configured.",
 
   // Welcome page

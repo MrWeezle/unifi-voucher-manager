@@ -16,8 +16,8 @@ export const de: Dictionary = {
 
   // Tabs
   tabViewVouchers: "Gutscheine",
-  tabQuickCreate: "Schnell erstellen",
-  tabCustomCreate: "Erweitert erstellen",
+  tabQuickCreate: "Für Mitglieder",
+  tabCustomCreate: "Manuell erstellen",
 
   // Forms — shared
   formDuration: "Gültigkeit",
@@ -119,7 +119,8 @@ export const de: Dictionary = {
   codeCopyFailed: "Code konnte nicht kopiert werden",
 
   // Wi-Fi QR
-  wifiScanToJoin: "Scannen, um zu verbinden mit",
+  wifiScanToJoin: "Scannen, um mit WLAN",
+  wifiScanToJoin_1: "zu verbinden",
   wifiNoCredentials: "Keine WLAN-Zugangsdaten konfiguriert.",
 
   // Welcome page
