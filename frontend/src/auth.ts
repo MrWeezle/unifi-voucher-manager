@@ -1,5 +1,19 @@
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      groups?: string[];
+    } & DefaultSession["user"];
+  }
+}
+
+declare module "@auth/core/jwt" {
+  interface JWT {
+    groups?: string[];
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
